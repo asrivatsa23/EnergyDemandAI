@@ -52,7 +52,16 @@ python src/app.py
 Frontend Setup
 # Navigate to frontend directory
 cd EnergyForecastingSystem/frontend
+📊 Models & Evaluation
+The system processes hourly load datasets to evaluate model accuracy across standard metrics:
 
+RMSE (Root Mean Squared Error)
+
+MAE (Mean Absolute Error)
+
+R² Score (Coefficient of Determination)
+
+Model outputs and comparison charts are stored automatically in /graphs and /results.
 # Install dependencies
 npm install
 
