@@ -1,0 +1,4 @@
+Model,MAE,R2
+Linear Regression,1822.84,0.2397
+Random Forest,1255.65,0.6044
+Random Forest + Lag + Time Split,177.19,0.9878
