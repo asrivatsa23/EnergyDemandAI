@@ -33,3 +33,28 @@ EnergyForecastingSystem/
     ├── random_forest_model.py
     ├── xgboost_model.py
     └── model_comparison.py
+Backend Setup
+# Navigate to the system directory
+cd EnergyForecastingSystem
+
+# Create and activate virtual environment
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Mac/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the API server / app
+python src/app.py
+Frontend Setup
+# Navigate to frontend directory
+cd EnergyForecastingSystem/frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
