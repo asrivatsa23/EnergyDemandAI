@@ -62,7 +62,26 @@ graph TD
 4. **Flexible Forecast Horizons**: 1-hour, 6-hour, 24-hour (next-day), and 7-day (weekly) horizon forecasting.
 5. **Explainable AI (XAI)**: SHAP waterfall plots, feature attributions, contribution direction (positive/negative impact), LIME instance insights, and natural language decision summaries ("Why is demand predicted to increase?").
 6. **Grid Anomaly Detection**: Isolation Forest and Z-score thresholding to flag unusual demand spikes, drops, and forecasting error deviations.
-7. **Modern React Dashboard**: Sleek dark glassmorphic UI with interactive Recharts, state/region selector, model comparison, custom CSV upload, and tabular CSV export.
+7. **Interactive React Dashboard**: Modern dark glassmorphism interface built with React 19, Recharts, Lucide Icons, state/region selectors, model comparison tables, custom CSV uploading, and tabular CSV export.
+
+---
+
+## 🖼️ Application Screenshots & User Interface
+
+### Executive Dashboard
+![Executive Dashboard](screenshots/_dashboard.png)
+
+### Multi-Horizon Forecast Engine
+![Forecast Engine](screenshots/forecast.png)
+
+### Model Comparison & Benchmarking
+![Model Comparison](screenshots/model_comparsion.png)
+
+### Explainable AI (SHAP & LIME Insights)
+![Explainable AI](screenshots/explainableXAI%29.png)
+
+### Exploratory Data & Weather Analysis
+![Data Analysis](screenshots/data%20analysis.png)
 
 ---
 

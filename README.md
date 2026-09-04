@@ -66,6 +66,25 @@ graph TD
 
 ---
 
+## 🖼️ Application Screenshots & User Interface
+
+### Executive Dashboard
+![Executive Dashboard](EnergyForecastingSystem/screenshots/_dashboard.png)
+
+### Multi-Horizon Forecast Engine
+![Forecast Engine](EnergyForecastingSystem/screenshots/forecast.png)
+
+### Model Comparison & Benchmarking
+![Model Comparison](EnergyForecastingSystem/screenshots/model_comparsion.png)
+
+### Explainable AI (SHAP & LIME Insights)
+![Explainable AI](EnergyForecastingSystem/screenshots/explainableXAI%29.png)
+
+### Exploratory Data & Weather Analysis
+![Data Analysis](EnergyForecastingSystem/screenshots/data%20analysis.png)
+
+---
+
 ## 📊 Measured Model Evaluation Results
 
 Models evaluated on strict chronological 15% test split (1,289 unseen hourly time steps):
