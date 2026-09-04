@@ -1,66 +1,77 @@
+import React from 'react';
 import {
-  CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
-  Tooltip,
+  ComposedChart,
+  Line,
+  Area,
   XAxis,
   YAxis,
-} from "recharts";
+  Tooltip,
+  Legend,
+  CartesianGrid
+} from 'recharts';
 
-export default function ForecastChart({ inputValues, timestamps, prediction }) {
-  if (!inputValues || inputValues.length === 0) return null;
-
-  const data = inputValues.map((value, idx) => ({
-    label: timestamps ? timestamps[idx] : `t-${inputValues.length - idx}`,
-    actual: value,
-    predicted: null,
-  }));
-
-  data.push({
-    label: "forecast",
-    actual: null,
-    predicted: prediction,
-  });
-
+const ForecastChart = ({ data = [], title = "24-Hour Ahead Electricity Demand Forecast" }) => {
   return (
-    <div className="card">
-      <h2>24-hour history &amp; forecast</h2>
-      <ResponsiveContainer width="100%" height={340}>
-        <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 11 }}
-            angle={-35}
-            textAnchor="end"
-            height={60}
-          />
-          <YAxis
-            tick={{ fontSize: 12 }}
-            domain={["auto", "auto"]}
-            label={{ value: "MW", angle: -90, position: "insideLeft" }}
-          />
-          <Tooltip formatter={(value) => (value === null ? "—" : `${value} MW`)} />
-          <Line
-            type="monotone"
-            dataKey="actual"
-            name="Previous 24 hours"
-            stroke="#2563eb"
-            strokeWidth={2}
-            dot={{ r: 2 }}
-            connectNulls={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="predicted"
-            name="Prediction"
-            stroke="#dc2626"
-            strokeWidth={0}
-            dot={{ r: 6 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="chart-card">
+      <div className="card-header">
+        <h3 className="card-title">{title}</h3>
+      </div>
+      <div style={{ width: '100%', height: 380 }}>
+        <ResponsiveContainer>
+          <ComposedChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 20 }}>
+            <defs>
+              <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.06)" />
+            <XAxis
+              dataKey="timestamp"
+              stroke="#9ca3af"
+              tickFormatter={(str) => str ? str.split(' ')[1] || str : ''}
+              style={{ fontSize: '0.8rem' }}
+            />
+            <YAxis
+              stroke="#9ca3af"
+              domain={['auto', 'auto']}
+              unit=" MU"
+              style={{ fontSize: '0.8rem' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#0e1626',
+                borderColor: 'rgba(6, 182, 212, 0.3)',
+                borderRadius: '8px',
+                color: '#fff'
+              }}
+            />
+            <Legend wrapperStyle={{ paddingTop: '10px' }} />
+            <Area
+              type="monotone"
+              dataKey="predicted_demand"
+              name="Predicted Demand (MU)"
+              stroke="#06b6d4"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorForecast)"
+            />
+            {data[0]?.actual_demand !== undefined && (
+              <Line
+                type="monotone"
+                dataKey="actual_demand"
+                name="Actual Demand (MU)"
+                stroke="#10b981"
+                strokeWidth={2}
+                dot={false}
+              />
+            )}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
-}
+};
+
+export default ForecastChart;

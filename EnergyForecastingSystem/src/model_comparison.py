@@ -1,44 +1,11 @@
-import matplotlib.pyplot as plt
+import os
+import pandas as pd
+from src.config import RESULTS_DIR
 
-models = [
-    "Linear Regression",
-    "Random Forest",
-    "XGBoost",
-    "LSTM"
-]
-
-mae_scores = [
-    1822.84,
-    1255.65,
-    174.53,
-    162.59
-]
-
-plt.figure(figsize=(10,5))
-
-plt.bar(
-    models,
-    mae_scores
-)
-
-plt.title(
-    "Model Comparison (MAE)"
-)
-
-plt.xlabel(
-    "Models"
-)
-
-plt.ylabel(
-    "Mean Absolute Error"
-)
-
-plt.savefig(
-    "../graphs/model_comparison.png"
-)
-
-plt.show()
-
-print(
-    "Graph Saved Successfully"
-)
+if __name__ == "__main__":
+    csv_path = os.path.join(RESULTS_DIR, "model_comparison.csv")
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        print(df.to_string(index=False))
+    else:
+        print("No evaluation results found. Please run: python -m src.train")

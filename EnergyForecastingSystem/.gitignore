@@ -1,13 +1,25 @@
-models/*
-!models/.gitkeep
-
-lstm_env/
-venv/
-
+# Python & Cache
 __pycache__/
 *.pyc
-
+.pytest_cache/
 .ipynb_checkpoints/
 
+# Virtual Environments
+venv/
+env/
+lstm_env/
+.env
+
+# Models & Large Binary Artifacts
+models/*.pkl
+models/*.keras
+!models/.gitkeep
+
+# Node / React Frontend
+node_modules/
+dist/
+.oxlintrc.json
+
+# OS files
 .DS_Store
 Thumbs.db

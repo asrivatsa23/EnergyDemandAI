@@ -1,366 +1,201 @@
-# Energy Consumption Forecasting System
+# EnergyDemandAI: AI-Powered Indian Electricity Demand Forecasting & Explainable Decision-Support System
 
-A Machine Learning and Deep Learning based web application that predicts the **next hour's electricity consumption** using historical energy usage data from the **PJM Hourly Energy Consumption Dataset**.
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.1-green.svg)](https://flask.palletsprojects.com/)
+[![React](https://img.shields.io/badge/React-19.0-cyan.svg)](https://react.dev/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The project demonstrates an end-to-end Machine Learning workflow including data preprocessing, feature engineering, model training, model comparison, deployment using Flask, and interactive visualization using Plotly.
-
----
-
-## Project Overview
-
-Energy consumption forecasting plays an important role in modern smart grids and power management systems. Accurate forecasting helps utility providers optimize electricity generation, reduce operational costs, and improve resource planning.
-
-This project predicts the next hour's electricity demand by learning patterns from the previous 24 hours of energy consumption.
+**EnergyDemandAI** is a research-oriented, production-ready AI platform designed for **Indian Electricity Demand Forecasting and Explainable Decision Support**. It supports regional/state grid data (Northern, Western, Southern, Eastern, North-Eastern regions), weather factors, renewable generation (solar, wind, hydro), calendar/holiday metadata, and multi-horizon time-series modeling.
 
 ---
 
-## Features
+## System Architecture
 
-* Historical energy consumption analysis
-* Data preprocessing and feature engineering
-* Multiple forecasting models
+```mermaid
+graph TD
+    A[Indian Electricity Grid Data] --> B[Data Loader & Validator]
+    B --> C[Preprocessing Pipeline]
+    C --> D[Multivariate Feature Engineering]
+    D --> E[Chronological Train / Val / Test Split]
+    
+    subgraph Model Suite
+        F1[Linear Regression Baseline]
+        F2[Random Forest Regressor]
+        F3[XGBoost Gradient Boosting]
+        F4[ARIMA / SARIMA Statistical]
+        F5[Multivariate LSTM Deep Learning]
+    end
 
-  * Linear Regression
-  * Random Forest
-  * XGBoost
-  * LSTM (Final Model)
-* Flask REST API backend
-* React dashboard frontend
-* CSV upload only (no manual data entry) — drag & drop or browse
-* **Runtime model selection** — choose LSTM, Random Forest, XGBoost, or
-  Linear Regression before running a prediction
-* Next-hour energy consumption prediction
-* SHAP-based explainability (XAI) for every prediction and every model,
-  showing how much each input feature contributed to the forecast
-* Downloadable sample CSV to test the upload flow
+    E --> F1
+    E --> F2
+    E --> F3
+    E --> F4
+    E --> F5
 
----
+    F1 & F2 & F3 & F4 & F5 --> G[Hybrid Ensemble Engine]
+    G --> H[24-Hour Ahead Forecast Engine]
+    
+    F2 & F3 & F1 --> I[SHAP & LIME Explainability XAI]
+    C --> J[Isolation Forest & Z-Score Anomaly Detection]
 
-## Dataset
-
-**Dataset:** PJM Hourly Energy Consumption Dataset
-
-The dataset contains hourly electricity consumption measurements collected from the PJM Interconnection power grid.
-
-Features used in the project include:
-
-* Hour
-* Day
-* Month
-* Day of Week
-* Previous Hour Consumption (Lag Features)
-* Previous 24 Hours Consumption (LSTM)
-
----
-
-## Models Implemented
-
-### 1. Linear Regression
-
-A baseline regression model used to understand the relationship between time-based features and energy consumption.
-
-**Performance**
-
-* MAE: **1822.84**
-* R² Score: **0.2397**
-
----
-
-### 2. Random Forest Regressor
-
-An ensemble learning algorithm capable of capturing nonlinear relationships.
-
-**Performance**
-
-* MAE: **177.19**
-* R² Score: **0.9878**
-
----
-
-### 3. XGBoost Regressor
-
-Gradient Boosting model with improved forecasting accuracy.
-
-**Performance**
-
-* MAE: **174.53**
-* R² Score: **0.9912**
-
----
-
-### 4. LSTM (Final Model)
-
-A Long Short-Term Memory neural network trained using the previous 24 hours of electricity consumption to predict the next hour.
-
-**Performance**
-
-* MAE: **162.59**
-* R² Score: **0.9924**
-
-LSTM produced the best forecasting accuracy and was selected as the deployment model.
-
----
-
-## 🏗️ Project Architecture
-
-```
-PJM Dataset
-      │
-      ▼
-Data Preprocessing
-      │
-      ▼
-Feature Engineering
-      │
-      ▼
-Model Training
-      │
-      ├── Linear Regression
-      ├── Random Forest
-      ├── XGBoost
-      └── LSTM
-              │
-              ▼
-Saved Model (.keras)
-              │
-              ▼
-Flask REST API  ──────────────► SHAP Explainer
-   (CSV upload only)                  │
-              │                       │
-              ▼                       ▼
-         Prediction            Per-hour contributions
-              │                       │
-              └───────────┬───────────┘
-                           ▼
-                   React Dashboard
-              (charts + SHAP explanation)
+    H & I & J --> K[Flask REST API Server]
+    K --> L[Interactive React Analytics Dashboard]
 ```
 
 ---
 
-## Web Application
+## Key Features
 
-The system is now split into a Flask REST API backend and a React
-dashboard frontend. Users can:
-
-* Choose which trained model runs the forecast — **LSTM**, **Random
-  Forest**, **XGBoost**, or **Linear Regression**
-* Upload a CSV file containing hourly energy data (this is the **only**
-  way to submit data — there is no manual entry form)
-* Download a ready-made sample CSV to try the upload flow
-* View the previous 24 hours and the predicted next hour on an
-  interactive chart
-* View a **SHAP explanation** for whichever model was used — per-hour
-  contributions for LSTM, or per-feature contributions (time-of-day and
-  lag values) for Random Forest, XGBoost, and Linear Regression
-
-Note: Random Forest, XGBoost, and Linear Regression need to know the
-timestamp of the reading they're forecasting for, so CSVs used with
-those models must include a `Datetime` (or `Date`/`Timestamp`) column.
-LSTM only needs the raw 24-hour value sequence.
-
----
-
-## Application Preview
-
-![Energy Forecasting Dashboard](screenshots/home_page.png)
+1. **Indian Power Grid Compatibility**: Native support for Indian state and regional electricity demand data (`Energy Required (MU)` / `Demand (MW)`), solar, wind, and hydro generation profiles, weather (Temperature, Humidity, Rainfall), and Indian national holidays/festivals.
+2. **Multivariate Feature Engineering**:
+   - **Temporal Features**: Hour, Day, Day of Week, Week of Year, Month, Quarter, Weekend indicators.
+   - **Cyclic Transformations**: Sin/Cos encoding for hours, days, and months.
+   - **Lag Features**: Lags 1, 2, 3, 6, 12, 24, 48, 72, 168 hours.
+   - **Rolling Statistics**: 3h, 6h, 12h, 24h, 168h rolling means, standard deviations, min/max bounds.
+3. **Multi-Model Suite**:
+   - **Linear Regression**: Baseline calendar-feature model.
+   - **Random Forest**: Multivariate ensemble tree regressor.
+   - **XGBoost**: Gradient-boosted decision tree algorithm.
+   - **ARIMA / SARIMA**: Statistical time-series model.
+   - **Multivariate LSTM**: Deep sequence-to-sequence neural network.
+   - **Hybrid Ensemble**: Inverse-validation-MAE weighted ensemble strategy.
+4. **Flexible Forecast Horizons**: 1-hour, 6-hour, 24-hour (next-day), and 7-day (weekly) horizon forecasting.
+5. **Explainable AI (XAI)**: SHAP waterfall plots, feature attributions, contribution direction (positive/negative impact), LIME instance insights, and natural language decision summaries ("Why is demand predicted to increase?").
+6. **Grid Anomaly Detection**: Isolation Forest and Z-score thresholding to flag unusual demand spikes, drops, and forecasting error deviations.
+7. **Modern React Dashboard**: Sleek dark glassmorphic UI with interactive Recharts, state/region selector, model comparison, custom CSV upload, and tabular CSV export.
 
 ---
 
-## Technology Stack
+## Measured Model Evaluation Results
 
-### Programming Language
+Models evaluated on strict chronological 15% test split (1,289 unseen hourly time steps):
 
-* Python
-
-### Machine Learning
-
-* Scikit-learn
-* XGBoost
-* TensorFlow / Keras
-
-### Data Processing
-
-* Pandas
-* NumPy
-
-### Visualization
-
-* Matplotlib
-* Plotly
-
-### Web Framework
-
-* Flask (REST API)
-* Flask-CORS
-
-### Frontend
-
-* React (Vite)
-* Recharts
-
-### Explainability (XAI)
-
-* SHAP (KernelExplainer)
+| Model | MAE (MU) | RMSE (MU) | MAPE (%) | R² Score | Training Time (s) | Prediction Time (s) |
+|---|---|---|---|---|---|---|
+| **XGBoost Regressor** | **13.95** | **17.70** | **4.03%** | **0.9594** | 0.696s | 0.006s |
+| **Random Forest** | 15.67 | 20.17 | 4.49% | 0.9474 | 1.060s | 0.030s |
+| **Hybrid Ensemble** | 19.64 | 24.35 | 6.04% | 0.9232 | 17.927s | 0.000s |
+| **Multivariate LSTM** | 25.92 | 33.96 | 7.53% | 0.8507 | 15.849s | 0.467s |
+| **ARIMA** | 101.21 | 118.97 | 33.33% | -0.8320 | 0.288s | 0.724s |
+| **Linear Regression** | 131.05 | 147.47 | 41.54% | -1.8151 | 0.035s | 0.007s |
 
 ---
 
-## 📂 Project Structure
+## Installation & Setup
 
-```
-EnergyForecastingSystem/
+### Prerequisites
+- **Python**: 3.11+
+- **Node.js**: v18+
 
-│
-├── data/
-│      AEP_hourly.csv
-│
-├── graphs/
-│      energy_consumption.png
-│      lstm_predictions.png
-│      model_comparison.png
-│
-├── models/
-│      random_forest.pkl
-│      xgboost.pkl
-│      lstm_model.keras
-│      lstm_scaler.pkl
-│
-├── src/
-│      app.py                  # Flask REST API (CSV upload + SHAP)
-│      linear_regression.py
-│      random_forest_model.py
-│      xgboost_model.py
-│      lstm_model.py
-│
-├── frontend/                  # React dashboard (Vite)
-│      index.html
-│      package.json
-│      vite.config.js
-│      src/
-│          App.jsx
-│          api.js
-│          components/
-│              Header.jsx
-│              CsvUploader.jsx
-│              MetricsPanel.jsx
-│              ForecastChart.jsx
-│              ShapExplanation.jsx
-│
-├── screenshots/
-│      home_page.png
-│
-├── requirements.txt
-│
-└── README.md
-```
-## Note
-
-Trained model files are included in this delivered project so it runs
-out of the box. The `models/` directory is still git-ignored (see
-`.gitignore`), since committing binary model files bloats a git
-repository — if you push this project to GitHub, the models won't be
-included in the commit.
-
-To regenerate any model, run its training script:
-
-1. `linear_regression.py` (now also saves `models/linear_regression.pkl`)
-2. `random_forest_model.py`
-3. `xgboost_model.py`
-4. `lstm_model.py`
-
-The generated models will be stored inside the `models/` directory.
-
----
-
-## Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/your-username/EnergyForecastingSystem.git
-```
-
-Move into the project
-
+### 1. Clone & Setup Backend
 ```bash
 cd EnergyForecastingSystem
-```
 
-### 1. Backend (Flask API)
-
-Install the required libraries
-
-```bash
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Generate Indian sample dataset & train all models
+python src/generate_sample_data.py
+python -m src.train
 ```
 
-Run the API
-
+### 2. Run Backend REST API
 ```bash
-cd src
-python app.py
+python src/app.py
 ```
+Backend API will start at: `http://localhost:5000`
 
-The API runs at `http://127.0.0.1:5000`. Key endpoints:
-
-| Method | Endpoint           | Description                                   |
-| ------ | ------------------ | ---------------------------------------------- |
-| GET    | `/api/health`       | Health check                                   |
-| GET    | `/api/models`       | List available models and their metrics       |
-| GET    | `/api/metrics`      | Metrics for a given model (`?model=xgboost`)   |
-| GET    | `/api/sample-csv`   | Downloads a valid sample CSV to test uploads   |
-| POST   | `/api/predict`      | Upload a CSV (`file`) + `model` id → prediction + SHAP |
-
-### 2. Frontend (React dashboard)
-
-In a separate terminal:
-
+### 3. Setup & Run React Frontend
 ```bash
 cd frontend
+
+# Install dependencies
 npm install
+
+# Start Vite dev server
 npm run dev
 ```
+Frontend will start at: `http://localhost:5173`
 
-Open your browser
+---
 
+## Automated Unit Testing
+
+Run the full pytest suite across preprocessing, feature engineering, models, forecasting, and REST API endpoints:
+
+```bash
+python -m pytest tests/ -v
 ```
-http://localhost:5173
+
+---
+
+## REST API Documentation
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/health` | GET | Check system & loaded models status |
+| `/api/models` | GET | List available models & benchmark performance metrics |
+| `/api/states` | GET | List supported Indian states |
+| `/api/regions` | GET | Get Indian regional power grid mapping |
+| `/api/history` | GET | Retrieve historical demand, weather & renewable data |
+| `/api/forecast` | GET | Generate multi-step forecast (1h, 6h, 24h, 7d) |
+| `/api/model-comparison` | GET | Retrieve comparative model metrics table |
+| `/api/explain` | GET | SHAP & LIME feature attributions & insights |
+| `/api/anomalies` | GET | Detected demand spikes, drops & Z-score anomalies |
+| `/api/sample-csv` | GET | Download sample Indian electricity CSV dataset |
+| `/api/predict` | POST | Upload custom CSV file & generate 24h prediction with XAI |
+
+---
+
+## Repository Structure
+
+```text
+EnergyForecastingSystem/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── sample/
+│       └── indian_electricity_sample.csv
+├── models/
+├── results/
+│   └── model_comparison.csv
+├── graphs/
+│   └── model_comparison.png
+├── src/
+│   ├── config.py
+│   ├── data_loader.py
+│   ├── preprocessing.py
+│   ├── feature_engineering.py
+│   ├── forecasting.py
+│   ├── train.py
+│   ├── evaluate.py
+│   ├── ensemble.py
+│   ├── explainability.py
+│   ├── anomaly_detection.py
+│   ├── app.py
+│   └── models/
+│       ├── linear_regression.py
+│       ├── random_forest.py
+│       ├── xgboost.py
+│       ├── arima.py
+│       └── lstm.py
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── api.js
+│   │   ├── index.css
+│   │   ├── App.css
+│   │   ├── components/
+│   │   └── pages/
+│   └── package.json
+└── tests/
+    ├── test_preprocessing.py
+    ├── test_features.py
+    ├── test_models.py
+    └── test_api.py
 ```
 
-The dev server proxies `/api/*` requests to the Flask backend on port
-5000, so make sure the backend is running first.
-
 ---
 
-## 📈 Results
-
-Among all implemented models, the LSTM network achieved the highest forecasting accuracy.
-
-| Model             |        MAE |   R² Score |
-| ----------------- | ---------: | ---------: |
-| Linear Regression |    2011.59 |     0.0506 |
-| XGBoost           |     174.53 |     0.9912 |
-| Random Forest     |     182.34 |     0.9902 |
-| LSTM              | **162.59** | **0.9924** |
-
----
-
-## 🔮 Future Improvements
-
-* Multi-step energy forecasting
-* Weather data integration
-* Real-time API support
-* Smart Grid dashboard
-* Cloud deployment
-* User authentication
-* Historical prediction storage
-
----
-
-##  Author
-
-**Ankita Kakade**
-
-Computer Science Engineering (Artificial Intelligence)
-
-Passionate about Machine Learning, Deep Learning, Data Science, and Generative AI.
+## License
+Distributed under the MIT License.

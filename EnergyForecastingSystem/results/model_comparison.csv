@@ -1,4 +1,7 @@
-Model,MAE,R2
-Linear Regression,1822.84,0.2397
-Random Forest,1255.65,0.6044
-Random Forest + Lag + Time Split,177.19,0.9878
+Model,MAE,RMSE,MAPE (%),R2,Training Time (s),Prediction Time (s)
+Linear Regression,131.05,147.47,41.54,-1.8151,0.035,0.007
+Random Forest,15.67,20.17,4.49,0.9474,1.06,0.03
+XGBoost,13.95,17.7,4.03,0.9594,0.696,0.006
+ARIMA,101.21,118.97,33.33,-0.832,0.288,0.724
+Multivariate LSTM,25.92,33.96,7.53,0.8507,15.849,0.467
+Hybrid Ensemble,19.64,24.35,6.04,0.9232,17.927,0.0

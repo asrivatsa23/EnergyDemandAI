@@ -1,98 +1,115 @@
-import { useCallback, useRef, useState } from "react";
-import { downloadSampleCsvUrl } from "../api";
+import React, { useState } from 'react';
+import { UploadCloud, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { uploadAndPredict } from '../api';
 
-const ACCEPTED_EXTENSION = ".csv";
+const CsvUploader = ({ onPredictionComplete, models = [], selectedModel }) => {
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
 
-function isCsvFile(file) {
-  if (!file) return false;
-  const nameOk = file.name.toLowerCase().endsWith(ACCEPTED_EXTENSION);
-  // Some browsers report an empty type for CSV; only reject when the
-  // browser is confident it's something else.
-  const typeOk =
-    file.type === "" ||
-    file.type === "text/csv" ||
-    file.type === "application/vnd.ms-excel";
-  return nameOk && typeOk;
-}
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setError(null);
+      setSuccessMsg(null);
+    }
+  };
 
-export default function CsvUploader({ onUpload, isLoading }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [localError, setLocalError] = useState(null);
-  const [fileName, setFileName] = useState(null);
-  const inputRef = useRef(null);
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a valid .csv file first.");
+      return;
+    }
 
-  const handleFiles = useCallback(
-    (fileList) => {
-      const file = fileList?.[0];
-      if (!file) return;
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
 
-      if (!isCsvFile(file)) {
-        setLocalError("Only .csv files are accepted. Please choose a CSV file.");
-        setFileName(null);
-        return;
+    try {
+      const res = await uploadAndPredict(file, selectedModel);
+      if (res.success) {
+        setSuccessMsg(`Successfully processed ${res.rows_processed} rows with model '${res.model_used}'.`);
+        if (onPredictionComplete) {
+          onPredictionComplete(res);
+        }
+      } else {
+        setError(res.error || "Upload and prediction failed.");
       }
-
-      setLocalError(null);
-      setFileName(file.name);
-      onUpload(file);
-    },
-    [onUpload]
-  );
-
-  const onDrop = useCallback(
-    (e) => {
-      e.preventDefault();
-      setIsDragging(false);
-      handleFiles(e.dataTransfer.files);
-    },
-    [handleFiles]
-  );
+    } catch (err) {
+      setError(err.response?.data?.error || "Network or backend error during CSV upload.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="card uploader-card">
-      <div className="uploader-header">
-        <h2>Upload energy data</h2>
-        <p className="muted">
-          CSV upload only &mdash; the file must include an{" "}
-          <code>AEP_MW</code> column with at least 24 rows. Models other
-          than LSTM also need a <code>Datetime</code> column.
-        </p>
+    <div className="chart-card">
+      <div className="card-header">
+        <h3 className="card-title">
+          <UploadCloud className="text-cyan-400" size={18} />
+          Upload Custom Indian Electricity Demand CSV Data
+        </h3>
       </div>
 
-      <div
-        className={`dropzone ${isDragging ? "dragging" : ""}`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-      >
+      <div style={{
+        border: '2px dashed var(--border-bright)',
+        borderRadius: '12px',
+        padding: '2.5rem 1.5rem',
+        textAlign: 'center',
+        background: 'rgba(6, 182, 212, 0.02)',
+        marginBottom: '1rem'
+      }}>
+        <FileText size={36} className="text-cyan-400" style={{ margin: '0 auto 0.75rem auto' }} />
+        <p style={{ color: '#fff', fontWeight: '600', marginBottom: '0.25rem' }}>
+          Select or drag your CSV file here
+        </p>
+        <p style={{ color: '#9ca3af', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
+          Requires a Datetime column and an Energy Demand column (e.g. 'Energy Required (MU)' or 'Demand (MW)')
+        </p>
+
         <input
-          ref={inputRef}
           type="file"
-          accept=".csv,text/csv"
-          hidden
-          onChange={(e) => handleFiles(e.target.files)}
+          accept=".csv"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+          id="csv-input"
         />
-        <div className="dropzone-icon">CSV</div>
-        <p>
-          <strong>Drag & drop</strong> a CSV file here, or click to browse
-        </p>
-        {fileName && <p className="filename">Selected: {fileName}</p>}
+        <label htmlFor="csv-input" className="btn-primary" style={{ display: 'inline-flex', cursor: 'pointer' }}>
+          Browse Files
+        </label>
+
+        {file && (
+          <div style={{ marginTop: '1rem', color: '#10b981', fontWeight: '600', fontSize: '0.9rem' }}>
+            Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+          </div>
+        )}
       </div>
 
-      {localError && <div className="error-banner">{localError}</div>}
+      {error && (
+        <div style={{ background: 'rgba(244, 63, 94, 0.1)', border: '1px solid rgba(244, 63, 94, 0.3)', padding: '0.8rem 1rem', borderRadius: '8px', color: '#f43f5e', fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <AlertCircle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
 
-      <div className="uploader-footer">
-        <a href={downloadSampleCsvUrl()} className="link-button">
-          Download a sample CSV
-        </a>
-        {isLoading && <span className="status-pill">Running prediction…</span>}
-      </div>
+      {successMsg && (
+        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '0.8rem 1rem', borderRadius: '8px', color: '#10b981', fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <CheckCircle size={18} />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      <button
+        className="btn-primary"
+        onClick={handleUpload}
+        disabled={loading || !file}
+        style={{ width: '100%', justifyContent: 'center', opacity: (loading || !file) ? 0.6 : 1 }}
+      >
+        {loading ? 'Processing & Predicting...' : 'Upload & Generate 24h Forecast'}
+      </button>
     </div>
   );
-}
+};
+
+export default CsvUploader;

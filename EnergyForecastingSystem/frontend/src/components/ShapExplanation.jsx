@@ -1,90 +1,93 @@
-import {
-  Bar,
-  BarChart,
-  Cell,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ReferenceLine,
-} from "recharts";
+import React from 'react';
+import { Cpu, ArrowUpRight, ArrowDownRight, Info } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
 
-const POSITIVE_COLOR = "#dc2626"; // pushes prediction up
-const NEGATIVE_COLOR = "#2563eb"; // pushes prediction down
+const ShapExplanation = ({ explanation = {} }) => {
+  const { base_value, features = [], summary } = explanation;
 
-export default function ShapExplanation({ shap, prediction }) {
-  if (!shap) return null;
-
-  const { base_value, values, labels } = shap;
-
-  const data = values.map((value, idx) => ({
-    label: labels ? labels[idx] : `t-${values.length - idx}`,
-    contribution: value,
-  }));
-
-  // Rank the hours by absolute impact so the most influential ones are
-  // easy to spot, in addition to seeing them in chronological order.
-  const ranked = [...data]
-    .sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
-    .slice(0, 5);
+  const topFeatures = features.slice(0, 10);
 
   return (
-    <div className="card">
-      <h2>Why this forecast? (SHAP explanation)</h2>
-      <p className="muted">
-        Each bar shows how much that hour pushed the prediction above (red)
-        or below (blue) the model's baseline expectation of{" "}
-        <strong>{base_value?.toLocaleString()} MW</strong>. The final
-        forecast of <strong>{prediction?.toLocaleString()} MW</strong> is the
-        baseline plus the sum of all contributions.
-      </p>
+    <div className="chart-card">
+      <div className="card-header">
+        <h3 className="card-title">
+          <Cpu className="text-cyan-400" size={18} />
+          Explainable AI (SHAP & LIME Feature Attribution)
+        </h3>
+        {base_value && (
+          <span style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
+            Base Demand Value: <strong style={{ color: '#fff' }}>{base_value} MU</strong>
+          </span>
+        )}
+      </div>
 
-      <ResponsiveContainer width="100%" height={320}>
-        <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 11 }}
-            angle={-35}
-            textAnchor="end"
-            height={60}
-          />
-          <YAxis
-            tick={{ fontSize: 12 }}
-            label={{ value: "MW contribution", angle: -90, position: "insideLeft" }}
-          />
-          <ReferenceLine y={0} stroke="#94a3b8" />
-          <Tooltip formatter={(value) => `${value > 0 ? "+" : ""}${value} MW`} />
-          <Bar dataKey="contribution">
-            {data.map((entry, index) => (
-              <Cell
-                key={index}
-                fill={entry.contribution >= 0 ? POSITIVE_COLOR : NEGATIVE_COLOR}
-              />
+      {summary && (
+        <div style={{
+          background: 'rgba(6, 182, 212, 0.08)',
+          borderLeft: '4px solid #06b6d4',
+          padding: '0.9rem 1.2rem',
+          borderRadius: '0 8px 8px 0',
+          marginBottom: '1.5rem',
+          fontSize: '0.9rem',
+          color: '#e5e7eb',
+          display: 'flex',
+          gap: '0.75rem',
+          alignItems: 'center'
+        }}>
+          <Info size={20} className="text-cyan-400" style={{ flexShrink: 0 }} />
+          <span>{summary}</span>
+        </div>
+      )}
+
+      <div style={{ width: '100%', height: 320 }}>
+        <ResponsiveContainer>
+          <BarChart data={topFeatures} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <XAxis type="number" stroke="#9ca3af" />
+            <YAxis dataKey="feature" type="category" stroke="#9ca3af" style={{ fontSize: '0.8rem' }} />
+            <Tooltip
+              contentStyle={{ backgroundColor: '#0e1626', borderColor: 'rgba(6, 182, 212, 0.3)', borderRadius: '8px', color: '#fff' }}
+              formatter={(val, name, props) => [`${val} (${props.payload.direction})`, 'Contribution']}
+            />
+            <Bar dataKey="contribution">
+              {topFeatures.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.direction === 'positive' ? '#10b981' : '#f43f5e'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="data-table-container" style={{ marginTop: '1.5rem' }}>
+        <table className="custom-table">
+          <thead>
+            <tr>
+              <th>Feature Name</th>
+              <th>Current Value</th>
+              <th>SHAP Contribution</th>
+              <th>Impact Direction</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topFeatures.map((f, i) => (
+              <tr key={i}>
+                <td style={{ fontWeight: '600' }}>{f.feature}</td>
+                <td>{f.value}</td>
+                <td style={{ fontWeight: '700', color: f.direction === 'positive' ? '#10b981' : '#f43f5e' }}>
+                  {f.contribution > 0 ? `+${f.contribution}` : f.contribution} MU
+                </td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: f.direction === 'positive' ? '#10b981' : '#f43f5e' }}>
+                    {f.direction === 'positive' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                    <span style={{ textTransform: 'capitalize', fontSize: '0.85rem' }}>{f.direction} Impact</span>
+                  </div>
+                </td>
+              </tr>
             ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-
-      <div className="shap-top-list">
-        <h3>Most influential hours</h3>
-        <ul>
-          {ranked.map((item, idx) => (
-            <li key={idx}>
-              <span className="shap-rank-label">{item.label}</span>
-              <span
-                className={`shap-rank-value ${
-                  item.contribution >= 0 ? "positive" : "negative"
-                }`}
-              >
-                {item.contribution >= 0 ? "+" : ""}
-                {item.contribution} MW
-              </span>
-            </li>
-          ))}
-        </ul>
+          </tbody>
+        </table>
       </div>
     </div>
   );
-}
+};
+
+export default ShapExplanation;
