@@ -185,7 +185,7 @@ def get_forecast():
 
     # Generate forecast
     forecast = generate_forecast(
-        model_obj=model_obj.model if hasattr(model_obj, "model") else model_obj,
+        model_obj=model_obj,
         model_type=model_id,
         historical_df=BENCHMARK_DF.tail(336),
         horizon_hours=horizon
@@ -292,7 +292,7 @@ def predict_uploaded():
         model_obj = LOADED_MODELS.get(model_id, LOADED_MODELS.get("xgboost"))
         
         forecast = generate_forecast(
-            model_obj=model_obj.model if hasattr(model_obj, "model") else model_obj,
+            model_obj=model_obj,
             model_type=model_id,
             historical_df=df_clean,
             horizon_hours=24
